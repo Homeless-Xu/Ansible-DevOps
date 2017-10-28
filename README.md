@@ -316,6 +316,7 @@ http://ansible-tran.readthedocs.io/en/latest/docs/intro_installation.html
     Ansible 最大的优点是不需要在节点中安装任何客户端。它使用SSH来和节点进行通信。
 
 
+
 🔶 Ansible 
     
     自动化运维工具!  基于Python开发的.
