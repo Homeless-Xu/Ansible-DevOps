@@ -1,0 +1,68 @@
+---
+- hosts: vps2
+gather_facts: no
+  remote_user: root
+  sudo: yes
+  sudo_user: root
+
+  tasks:
+  - name: ensure libsodium is installed
+    yum: pkg=libsodium state=latest
+
+  - name: python-setuptools
+    yum : pkg=python-setuptools state=latest
+
+  - name: Git 
+    yum : pkg=git state=latest
+
+#  - name: install pip with easy_install
+#    easy_install: name=pip state=latest
+
+  - name: install cymysql use pip
+    pip: name=cymysql state=latest
+
+  - git:
+      repo='https://github.com/Xu-Jian/shadowsocksr'      
+      dest=~/shadowsocksr
+      
+
+  - name: Check that the somefile.conf exists
+    stat:
+      path: ~/shadowsocksr/usermysql.json
+    register: stat_result
+
+  - name: Create the file, if it doesnt exist already
+    shell: cd ~/shadowsocksr && bash initcfg.sh
+    when: stat_result.stat.exists == False 
+
+
+
+
+
+
+  - name: Download usermysql.json
+    get_url:
+      url: https://raw.githubusercontent.com/Xu-Jian/Ansible-DevOps/master/SSR/sources/usermysql.json
+      dest: /root/shadowsocksr/
+      force: yes
+
+
+  - name: Download userapiconfig.py
+    get_url:
+      url: https://raw.githubusercontent.com/Xu-Jian/Ansible-DevOps/master/SSR/sources/userapiconfig.py
+      dest: /root/shadowsocksr/
+      force: yes
+
+
+  - name: Download user-config.json
+    get_url:
+      url: https://raw.githubusercontent.com/Xu-Jian/Ansible-DevOps/master/SSR/sources/user-config.json
+      dest: /root/shadowsocksr/
+      force: yes
+
+
+
+
+
+
+

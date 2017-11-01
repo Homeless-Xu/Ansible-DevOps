@@ -1,0 +1,58 @@
+
+
+🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶 数据库安装 🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶
+
+怎么创建数据库呢...
+RDS 不是 vps.. 好像没有登录功能的按! 怎么登录数据库呢...
+对了 有个 域名. 然后账号密码就可以了.
+但是怎么创建数据库了  mysql xxxx 命令 连到数据库就可以了.!
+也能连上去... 
+
+1. 首先建立数据库.  
+
+2. 然后下载一个 db.sql 文件 (默认加密方式是 chacha20)
+https://raw.githubusercontent.com/Xu-Jian/Ansible-DevOps/master/sources/db.sql
+
+3. 导入数据表, 然后就算创建好了.
+数据库不是重点.
+
+把这个直接写成脚本不就可以了.
+让脚本去 连接数据库. 下载配置文件. 执行文件! 
+你可以用 shell  也能用python . 运维么. 还是 shell 的通用性强点. python 人家不一定有安装, 而且还要区分版本! 
+
+
+要创建数据库
+
+普通人是没有数据库权限的. 
+所以数据库操作 最好是  写成 .sql ...
+其实就是 sql 脚本...
+里面都是一些数据库的命令! 为什么不自己写在 脚本里面呢! 
+区分啊. 脚本太大了  也不知道干嘛的!  sql 脚本肯定是 操作 sql 的
+怎么执行sql 文件呢... ssh 就可以. 
+mysql –u用户名 –p密码 –D数据库<【sql脚本文件路径全名】
+所以也不需要人工干预... 可以实现自动化的! 
+
+
+下一步就是 ansible 判断数据库状态了... 能不能连上数据库
+还好! 这个也已经有 模块了!!!  也不要你操心... 
+mysql_db 模块, 配置下 主机,端口,账户密码.
+这个能直接创建数据库. 当然执行 .sql 也不在话下!!!
+
+⦿ 创建数据库
+
+- name: Create a new database with name 'bobdata'
+  mysql_db:
+    name: bobdata
+    state: present
+
+
+⦿ 执行 sql 脚本...
+- name: Import file.sql similar to mysql -u <username> -p <password> < hostname.sql
+  mysql_db:
+    state: import
+    name: all
+    target: /tmp/{{ inventory_hostname }}.sql
+
+
+
+

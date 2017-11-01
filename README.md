@@ -2,7 +2,6 @@
 
     自学苦逼, 不写个项目出来都不敢说自己会配置管理! 
 
-    这个项目的最终目的就是为了可以自动化安装一个SSR !
 
 
 # TODO 
@@ -1295,3 +1294,61 @@ $ ansible-playbook test.yml
 
 
 
+
+
+
+⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️------⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️
+🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵 Ansible 进阶 🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵
+⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️------⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️
+
+🔵 Ansible (Mac)
+
+🔶 Mac 安装
+
+    其实服务端是不需要公有IP的.所以在Mac 本地搭服务会好很多...
+    可以用brew 安装. 但是版本比较老.最好用 pip 安装. 
+    sudo easy_install pip  ➜  安装 pip 
+    sudo pip install ansible --quiet  ➜ 安装 ansible
+    sudo pip install ansible --upgrade   ➜ 升级 ansible
+    ansible --version ➜ 查看安装的版本
+
+🔶 Mac 配置
+
+
+
+
+
+
+
+
+
+
+
+
+🔵 关闭 gathering facts
+
+    facts 能获取节点的信息, 比如IP/主机名. 这些信息在你用模板的时候比较有用, 
+    如果你用不到这些数据, 还是关闭这个功能, 能非常明显的加快脚本执行速度.
+    关闭获取 facts 很简单，只需要在 playbook 文件中加上“gather_facts: no”即可.
+
+    --- 
+    - hosts: 172.16.64.240 
+    gather_facts: no 
+
+
+
+🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶 playbook 技巧 🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶
+
+🔵 register  获取执行命令的输出
+
+    playbook 里肯定会用 command 或者 shell 模块执行一些自定义脚本.
+    这些自定义脚本独立使用的时候肯定有输出的!  比如执行成功 或者 失败.
+    那么 playbook 里的脚本的状态怎么输出呢... 用 register 关键字!
+
+    register 关键字可以储存指定命令的输出结果到一个自定义变量中.
+    然后我们只要访问这个自定义变量就可以获取到输出结果了.
+    register 的使用也很简单. task 里指定一个变量就行.
+
+    - name: echo date 
+    command: date 
+    register: date_output 

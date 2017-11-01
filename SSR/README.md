@@ -1,8 +1,9 @@
 # Ansible-SSR
 
-    自学苦逼, 不写个项目出来都不敢说自己会配置管理! 
+    本文目的就是为了可以自动化安装一个多人翻墙SSR 的后端部分.
 
-    这个项目的最终目的就是为了可以自动化安装一个多人翻墙SSR !
+    2017-11-1-14 亲测可行  ✔︎
+
 
 🔶 SSR 组成  
 
@@ -21,53 +22,16 @@
 
 
 
-
-
-
-# 目的 
-
-数据库只有一个, 数据库要公开么! 
-最好么... 只有一个数据库, 然后节点很多! 
-后端是必须要连数据库才行的. 公开后怎么保证自己安全呢.能读. 能写
-
-
-
-后端节点可以有很多.  
-前端用
-
-
-
-
-
-
 🔶 数据库安全
 
     我的 数据库密码都是直接写在配置文件中的.
-    当然这个数据库的用户权限有限制的. 只能使用固定的IP 才能连. 
-    下面就来说说 怎么操作..如果你要连我数据库,会有下面的报错.
-
-    远程连接Mysql时提示如下： 
-    错误码：1045 
-    Access denied for user 'root@xx.xx.xx.xx'(using password:YES) 
-
+    当然这个数据库的用户权限有限制的. 而且只能使用固定的IP 才能连. 
+    下面就来说说 怎么操作..如果你要连我数据库,会有下面的报错. 
+    错误码：1045  Access denied for user 'root@xx.xx.xx.xx'(using password:YES) 
     这个提示通常是由于Mysql默认的IP限制原因。 
-
-    只要去 mysql 某个用户下. 把 host 的值 改为 % 就所有人都可以连了.
+    只要登录 mysql 把,某个用户的 host 的值 改为 % 就所有人都可以连了.
     把% 改成 127.0.0.1 就只有本机可连
-
-
-
-
-# TODO 
-
-1. mysql 安装, 数据库创建. ssr.sql 脚本导入.
-
-2. ssr 后端搭建 
-
-3. ssr 前端搭建...
-
-
-
+    把% 改成 23.105.192.96 就只有这个IP可连
 
 
 
@@ -78,112 +42,108 @@
 🔵 1. vps2 配置 ssh  让 gce 可以连上.
 
 
-🔵 SSR 搭建简介
+🔵 SSR 搭建步骤简介
 
-无非是一个从节点!  只要搭建下 ssr 后端就好了!  数据库/前端都不用!!
-
-SSR 后端是需要加密的, 所以要安装依赖: libsodium
-
-然后就是一些 python 依赖
-
-最后就是 ssr 安装
-
-然后 ssr 配置
-
-再加上 服务的自启动! 就可以了!!!
+    本文只搭建下 ssr 后端!  数据库/前端都不用!!
+    SSR 后端是需要加密的, 所以要安装依赖: libsodium
+    然后就是一些 python 依赖
+    最后就是 ssr 安装
+    然后 ssr 配置
+    再加上 服务的自启动! 就可以了!!!
 
 
 🔵 libsodium 安装
 
-1. 确保对方是 没安装 libsodium 的. 
-然后我们用 playbook 来安装软件! 
-gce 创建创建 ssr.yml
+    🔶 gce 创建创建 ssr.yml
 
+        ---
+        - hosts: vps2
+        remote_user: root
 
----
-- hosts: vps2
-  remote_user: root
+        tasks:
+        - name: ensure libsodium is installed
+            yum: pkg=libsodium state=latest
 
-  tasks:
-  - name: ensure libsodium is installed
-    yum: pkg=libsodium state=latest
+    🔶 GCE 运行脚本
+        ✘✘∙GCE ~ ➜ ansible-playbook ssr.yml
 
+        TASK [ensure libsodium is installed] ***************************************************
+        changed: [104.224.139.45]
 
-✘✘∙GCE ~ ➜ ansible-playbook ssr.yml
+    🔶 vps2 检测
 
-TASK [ensure libsodium is installed] ***********************************************************************************
-changed: [104.224.139.45]
-
-
-
-
-然后去 vps2 上
-yum list libsodium 就可以看到安装包了.说明安装好了.
-我们再执行 yml 脚本就会发现, 这个任务返回的状态是 ok 而不是 changed,
-说明vps2 已经安装过 这个依赖了! 自然也不需要改变了.
-✘✘∙GCE ~ ➜ ansible-playbook ssr.yml
-
-TASK [ensure libsodium is installed] ***********************************************************************************
-ok: [104.224.139.45]
+        yum list libsodium 可以看到安装包了.说明安装好了.
+        我们再执行 yml 脚本就会发现, 这个任务返回的状态是 ok 而不是 changed,
+        说明vps2 已经安装过 这个依赖了! 自然也不需要改变了.
 
 
 
-🔵 Python 依赖安装
 
-    yum install python-setuptools -y 
-    && yum install git 
-    && easy_install pip 
-    && pip install cymysql
+🔵 依赖安装
 
-主要是为了安装 cymysql 这个.
+🔶 简介
+    
+    安装 SSR 之前 需要安装下面这些依赖.
+
+        yum install python-setuptools -y 
+        && yum install git 
+        && easy_install pip 
+        && pip install cymysql
+
 
 🔶  python-setuptools
-  - name: python-setuptools
-    yum : pkg=python-setuptools state=latest
 
-    然后去 vps2 yum list python-setuptools 会发现有个 
-    Installed Packages
-    python-setuptools.noarch        0.9.8-7.el7        @base
-    就说明安装好了.
+    ⦿ playbook 脚本
+
+        - name: python-setuptools
+            yum : pkg=python-setuptools state=latest
+
+    ⦿ vps2 验证:
+
+     yum list python-setuptools 
+     的 Installed Packages 里面如果有
+     python-setuptools.noarch        0.9.8-7.el7        @base
+     就说明安装好了.
 
 
 🔶 Git 
-    首先去 vps2 看看有没有安装 git ➜  yum list git 
-    Installed Packages
-    git.x86_64           1.8.3.1-6.el7_2.1           @base
-    Available Packages
-    git.x86_64           1.8.3.1-12.el7_4            updates
-    发现以及安装了. 而且有个新版本出来了. 不管. 先卸载掉 yum remove git 
-    再看 yum list git 就发现
-    Available Packages
-    git.x86_64           1.8.3.1-12.el7_4            updates
-    也就说 当前没有安装! 
 
+    ⦿ vps2 查看
 
-  - name: Git 
-    yum : pkg=git state=latest
+        首先去 vps2 看看有没有安装 git ➜  yum list git 
+        Installed Packages
+        git.x86_64           1.8.3.1-6.el7_2.1           @base
+        Available Packages
+        git.x86_64           1.8.3.1-12.el7_4            updates
+        发现以及安装了. 而且有个新版本出来了. 不管. 先卸载掉 yum remove git 
+        再看 yum list git 就发现
+        Available Packages
+        git.x86_64           1.8.3.1-12.el7_4            updates
+        也就说 当前没有安装! 
+
+    ⦿ playbook 脚本
+
+        - name: Git 
+            yum : pkg=git state=latest
+
 
 🔶 pip   
 
-    easy_install pip
-
-    首先得卸载啊. 
-
-    在python的学习过程中，肯定会遇到很多安装模块的地方，
-    可以使用easy_install安装，但是easy_install相对于pip而言，最大的缺陷就是它所安装的模块是不能够卸载的，其他功能是和pip一样的。
-    卸载麻烦就不卸载了.那么怎么 用 easy_install 来安装 pip 呢!!!
-    看官方文档就行了!  非常简单的...
+    pip 一般是用 easy_install pip 来安装的,
+    这种安装方式 不好卸载. 我们就不卸载了.
+    怎么用 Ansible 来安装 php呢! 用 easy_install 模块!
+    模块不会用看官方文档就行了!  非常简单的...
     http://docs.ansible.com/ansible/latest/easy_install_module.html
-    需要搜索什么 可以直接右下角进行搜索! 比如 pip 命令
+    需要搜索什么其他模块, 可以直接右下角进行搜索! 比如 pip 命令
 
+    官方手册的例子
     - easy_install:
         name: pip
         state: latest
 
-    我们加个 name 上去 就变成了    !!! ?????? 
-
-    - name:  install pip with easy_install
-    easy_install: name=pip state=latest
+    我们加个name 上去就可以了
+        - name:  install pip with easy_install
+        easy_install: name=pip state=latest
 
 
 🔶 cymysql
@@ -201,68 +161,48 @@ ok: [104.224.139.45]
     这也是个模块!   而且也能指定安装路径!  原始命令是下面这样的
     🔅 cd ~ && git clone -b manyuser https://github.com/shadowsocksr/shadowsocksr.git
 
-    丫的 原理 ssr 项目没有了啊 !!   fuck...  404 页面...
-    丫的 ssr 项目终止了啊. 噩耗啊.. 哪里去找源码按....
-
-
-    怎么转为 ansible 命令呢.
-    首先要知道 clone 参数  和 -b 参数的作用
-
-    ⦿ clone 参数
-    下载就是 clone .上传就是 push ... 没啥好说的...
-
-    参数挺多，但常用的就几个：
-
-    1. 最简单直接的命令
-
-    git clone xxx.git
-    2. 如果想clone到指定目录
-
-    git clone xxx.git "指定目录"
+    git 命令非常简单
+    最简单直接的命令    git clone xxx.git
+    如果想clone到指定目录    git clone xxx.git "指定目录"
+    
+    ansible 中的 git 模块, 默认值就是 clone . 所以可以不写.
+    一般情况肯定是新建个文件夹来放 git 下载下来的文件的.
+    所以要用 dest 参数来指定一个安装路径. 这个路径会自动创建.
+    下面的 ~/ 目录下本来是没有shadowsocksr文件夹的, 
+    执行这个 playbook 后会自动创建!
 
     - git:
         repo='https://github.com/Xu-Jian/shadowsocksr'
         dest=~/shadowsocksr
 
-        这个项目失效了! 得换个链接才行!       
-        好像不能直接安装到 /root 下的. 要给 git 项目一个文件夹!
-        好像会进行初始化啊!  /root 目录当然不能初始化了.
+
 
 
 🔶 SSR 初始化 
 
     下载后 是需要进入 ssr 文件夹 进行初始化的! 
     虽然只要这么一个命令!  cd ~/shadowsocksr && bash initcfg.sh
-    其实这个命令也没干啥事... 就是设置权限. 加上把一些配置文件复制一份,
-    方便你修改, 而是不是所有配置文件要你自己写....
-    但是这个命令也不能重复运行! 不然你下面设置好的配置文件会被覆盖... 有重新执行..
-    所以这个要怎么处理呢!!!
-    只能事先判断了. 这个初始化命令会生成一个 usermysql.json.
-    如果没有这个文件, 那么就进行初始化1  不然就不初始化! 
+    初始化脚本,也就是设置下文件权限. 加创建一些配置文件.
+    但是这个命令也不能重复运行! 不然你下面设置好的配置文件会被覆盖... 
+    这个初始化命令会生成一个 usermysql.json
+    所以只要事先判断有没有这个文件, 就知道是否初始化过了.
+    要判断文件状态 (检查文件存在) 就得用  stat 模块了
 
-    ⦿  Ansible 文件判断 stat 模块
-        Ansible 1有更直接的方式检查文件存在情况使用" stat " 模块。 
-
-        当文件不存在. 就执行....初始化...
-
-    tasks:
-    - name: Check that the somefile.conf exists
+    - name: Check that the usermysql.json exists
         stat:
         path: ~/shadowsocksr/usermysql.json
         register: stat_result
 
-    - name: Create the file, if it doesnt exist already
+    - name: do something, if the file doesn't exist
         shell: cd ~/shadowsocksr && bash initcfg.sh
         when: stat_result.stat.exists == False 
 
 
-
-
-
 🔶 SSR 配置文件
-    这个 只能事先 服务器上配置好! 然后自己给节点了!  
-    为了统一, 我的配置文件就放到 github 上了.
-    免得哪天 gce 重装了 啥也没有了. 
+
+    这个配置文件要么事先服务器上配置好! 然后复制给节点了!  
+    要么就用正则式,改节点的配置文件.
+    为了统一, 我的配置文件就放到 github 上了.免得哪天 gce 重装了 啥也没有了. 
 
     userapiconfig.py
     连接前端的, 要配置 v2 还是v3 ,  单人ss 还是多人的 ssr 
@@ -273,9 +213,8 @@ ok: [104.224.139.45]
     /root/shadowsocksr/user-config.json
     配置后端的 加密方式! 
 
-    下一步就是下载配置文件了.
-    这里的话 文件肯定是存在的,,,, 要覆盖!也就是用服务器上的文件. 替换默认文件.
-    这就需要 下载模块了  get_url 
+    由于上面进行初始化后,这三个文件肯定是存在的,,,, 要先下载 然后 覆盖!
+    下载模块了  get_url 
     http://docs.ansible.com/ansible/latest/get_url_module.html
 
 
@@ -303,93 +242,19 @@ ok: [104.224.139.45]
 
 🔶 启动服务
 
-  - name: start ssr 
-    shell: sh /root/shadowsocksr/run.sh
+    - name: start ssr 
+        shell: sh /root/shadowsocksr/run.sh
 
 
  🔶 开机自启  supervisorctl
 
-你可以用 rc.local 来自动启动. 也可以用 supervisor...
-andible 就有个 supervisor 模块!  supervisorctl ...
+    你可以用 rc.local 来自动启动. 也可以用 supervisor...
+    andible 就有个 supervisor 模块!  supervisorctl ...
 
-- supervisorctl:
-    name: my_app
-    state: started
+    - supervisorctl:
+        name: my_app
+        state: started
 
-    当然这个得先安装并配置 supervisor ...
-    好像安装 supervisor 后也不需要这个 插件了吧?
-
-
-
-
-
-
-
-
-
-🔶 开机启动
-
-
-
-
-
-🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶 数据库安装 🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶🔶
-
-怎么创建数据库呢...
-RDS 不是 vps.. 好像没有登录功能的按! 怎么登录数据库呢...
-对了 有个 域名. 然后账号密码就可以了.
-但是怎么创建数据库了  mysql xxxx 命令 连到数据库就可以了.!
-也能连上去... 
-
-1. 首先建立数据库.  
-
-2. 然后下载一个 db.sql 文件 (默认加密方式是 chacha20)
-https://raw.githubusercontent.com/Xu-Jian/Ansible-DevOps/master/sources/db.sql
-
-3. 导入数据表, 然后就算创建好了.
-数据库不是重点.
-
-把这个直接写成脚本不就可以了.
-让脚本去 连接数据库. 下载配置文件. 执行文件! 
-你可以用 shell  也能用python . 运维么. 还是 shell 的通用性强点. python 人家不一定有安装, 而且还要区分版本! 
-
-
-要创建数据库
-
-普通人是没有数据库权限的. 
-所以数据库操作 最好是  写成 .sql ...
-其实就是 sql 脚本...
-里面都是一些数据库的命令! 为什么不自己写在 脚本里面呢! 
-区分啊. 脚本太大了  也不知道干嘛的!  sql 脚本肯定是 操作 sql 的
-怎么执行sql 文件呢... ssh 就可以. 
-mysql –u用户名 –p密码 –D数据库<【sql脚本文件路径全名】
-所以也不需要人工干预... 可以实现自动化的! 
-
-
-下一步就是 ansible 判断数据库状态了... 能不能连上数据库
-还好! 这个也已经有 模块了!!!  也不要你操心... 
-mysql_db 模块, 配置下 主机,端口,账户密码.
-这个能直接创建数据库. 当然执行 .sql 也不在话下!!!
-
-⦿ 创建数据库
-
-- name: Create a new database with name 'bobdata'
-  mysql_db:
-    name: bobdata
-    state: present
-
-
-⦿ 执行 sql 脚本...
-- name: Import file.sql similar to mysql -u <username> -p <password> < hostname.sql
-  mysql_db:
-    state: import
-    name: all
-    target: /tmp/{{ inventory_hostname }}.sql
-
-
-
-
-
-
+        当然这个得先安装并配置 supervisor ...
 
 

@@ -1,0 +1,13 @@
+---
+
+  - hosts: vps2
+    gather_facts: no
+    remote_user: root
+
+tasks:
+  
+  - name: echo date
+    command: date
+    register: date_output
+    command: echo date_output
+
