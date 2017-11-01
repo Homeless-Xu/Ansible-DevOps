@@ -1,0 +1,13 @@
+{
+    "host": "35.194.128.92",
+    "port": 3306,
+    "user": "root",
+    "password": "xujian0219",
+    "db": "ss-vps1",
+    "node_id": 2,
+    "transfer_mul": 1.0,
+    "ssl_enable": 0,
+    "ssl_ca": "",
+    "ssl_cert": "",
+    "ssl_key": ""
+}
