@@ -1,7 +1,7 @@
 {
     "host": "35.194.128.92",
     "port": 3306,
-    "user": "root",
+    "user": “ssr”,
     "password": "xujian0219",
     "db": "ss-vps1",
     "node_id": 2,

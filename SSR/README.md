@@ -38,14 +38,22 @@
 
 
 
+
+
 🔶 数据库安全
 
-你可以连接 我的 数据库.
-然后去我的 前端 注册....
-然后 IP 用你自己的就可以了.
-所以 你要的只是 搭建后端+然后连我的数据库.
+    我的 数据库密码都是直接写在配置文件中的.
+    当然这个数据库的用户权限有限制的. 只能使用固定的IP 才能连. 
+    下面就来说说 怎么操作..如果你要连我数据库,会有下面的报错.
 
-你既然能连我的数据库...自然也能...
+    远程连接Mysql时提示如下： 
+    错误码：1045 
+    Access denied for user 'root@xx.xx.xx.xx'(using password:YES) 
+
+    这个提示通常是由于Mysql默认的IP限制原因。 
+
+    只要去 mysql 某个用户下. 把 host 的值 改为 % 就所有人都可以连了.
+    把% 改成 127.0.0.1 就只有本机可连
 
 
 
@@ -265,24 +273,63 @@ ok: [104.224.139.45]
     /root/shadowsocksr/user-config.json
     配置后端的 加密方式! 
 
-下一步就是下载配置文件了.
-这里的话 文件肯定是存在的,,,, 要覆盖!也就是用服务器上的文件. 替换默认文件.
+    下一步就是下载配置文件了.
+    这里的话 文件肯定是存在的,,,, 要覆盖!也就是用服务器上的文件. 替换默认文件.
+    这就需要 下载模块了  get_url 
+    http://docs.ansible.com/ansible/latest/get_url_module.html
+
+
+    - name: Download usermysql.json
+    get_url:
+        url: https://raw.githubusercontent.com/Xu-Jian/Ansible-DevOps/master/SSR/sources/usermysql.json
+        dest: /root/shadowsocksr/
+        force: yes
+
+
+    - name: Download userapiconfig.py
+    get_url:
+        url: https://raw.githubusercontent.com/Xu-Jian/Ansible-DevOps/master/SSR/sources/userapiconfig.py.json
+        dest: /root/shadowsocksr/
+        force: yes
+
+
+    - name: Download user-config.json
+    get_url:
+        url: https://raw.githubusercontent.com/Xu-Jian/Ansible-DevOps/master/SSR/sources/user-config.json
+        dest: /root/shadowsocksr/
+        force: yes
+
+
+
+🔶 启动服务
+
+  - name: start ssr 
+    shell: sh /root/shadowsocksr/run.sh
+
+
+ 🔶 开机自启  supervisorctl
+
+你可以用 rc.local 来自动启动. 也可以用 supervisor...
+andible 就有个 supervisor 模块!  supervisorctl ...
+
+- supervisorctl:
+    name: my_app
+    state: started
+
+    当然这个得先安装并配置 supervisor ...
+    好像安装 supervisor 后也不需要这个 插件了吧?
 
 
 
 
 
-⦿ 数据库安全.
-这个后端是要对数据库有读写权限的.
-反正自己的 vps1 和  vps2 是固定IP 
-所以 gce 的msql 可以设置成. 只允许从固定IP 访问.
-并且权限的话 只能用某个数据库. 而不是所有的数据库.
-aws 的 rds 数据库.... 
 
-我们弄个永久免费的数据库.
-RDS 的话只是... 12个月免费...也够了!  弄负载均衡.. 主从备份! 到期再说...
 
-数据库安装好后 也是很多工作的....
+
+
+🔶 开机启动
+
+
 
 
 
