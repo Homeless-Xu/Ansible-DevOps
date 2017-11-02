@@ -1,13 +1,21 @@
 ---
+- hosts: vps2
+  gather_facts: no  # 避免收集节点信息, 蛮耗时的.
+  remote_user: root
 
-  - hosts: vps2
-    gather_facts: no
-    remote_user: root
 
-tasks:
-  
-  - name: echo date
-    command: date
-    register: date_output
-    command: echo date_output
+  tasks:
 
+    - name: echo date 
+      command: date 
+      register: date_output 
+
+    - name: show results?
+      debug: msg="{{date_output.stdout}}"
+
+
+    - command: "echo {{item}}"
+      register: result
+      with_items: [1, 2]
+    - debug:
+        var: result
